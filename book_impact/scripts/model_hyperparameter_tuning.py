@@ -12,6 +12,8 @@ from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.functions import udf
 from pyspark.sql.types import StringType
 
+from book_impact.transformers.save_to_parquet import SaveToParquet
+
 MLFLOW_EXPERIMENT_NAME = "Grid Search for configuration parameters"
 
 class ParquetDataFrame(DataFrame):
@@ -120,10 +122,10 @@ def tune_model_param(phase, master_url, input_path):
         for item in cross_val_model.bestModel.stages[1].extractParamMap().items():
             print(f'- {item[0]}: {item[1]}')
             mlflow.log_param(item[0], item[1])
-
+        SaveToParquet(f"data/processed/test/features").transform(test_features_df)
         spark.stop()
         mlflow.end_run()
 
 
 if __name__ == "__main__":
-    preprocess_data()
+    tune_model_param()

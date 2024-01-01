@@ -111,4 +111,4 @@ def train_model(phase, master_url, input_path):
 
 
 if __name__ == "__main__":
-    preprocess_data()
+    train_model()

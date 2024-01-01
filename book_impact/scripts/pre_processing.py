@@ -94,6 +94,8 @@ def preprocess_data(phase, master_url, input_path):
     print(f'Best model parameters:')
     for item in cross_val_model.bestModel.stages[1].extractParamMap().items():
         print(f'- {item[0]}: {item[1]}')
+    
+    SaveToParquet(f"data/processed/test/features").transform(test_features_df)
 
     spark.stop()
 
