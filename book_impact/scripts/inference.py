@@ -60,9 +60,7 @@ def inference_model(phase, master_url, test_data_path, model_path, prediction_pa
             SaveToParquet(prediction_path)
         ]).transform(ParquetDataFrame(test_data_path, spark))
 
-    predicted_df.show(2)
-
-        
+    predicted_df.select("Impact","prediction").show(20)
     spark.stop()
 
 

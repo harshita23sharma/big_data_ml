@@ -1,0 +1,2 @@
+spark-ml
+spark-nlp==5.2.1
