@@ -11,7 +11,7 @@ class GetMonthFromDate(Transformer):
         self._col = column
 
     def _transform(self, dataset: DataFrame) -> DataFrame:
-        dataset.withColumn(
+        dataset = dataset.withColumn(
             f"{self._col}_month", fn.regexp_extract(self._col, r"(?<=-)(\d{2})", 0)
         )
         return dataset

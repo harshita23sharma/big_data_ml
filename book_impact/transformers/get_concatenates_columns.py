@@ -14,7 +14,9 @@ class GetConcatenatedColumns(Transformer):
         self._cols = columns
 
     def _transform(self, dataset: DataFrame) -> DataFrame:
-        dataset = dataset.fillna("").withColumn(
+        dataset.withColumn(self._cols[0], F.when(F.col(self._cols[0]).isNull(), '').otherwise(F.col(self._cols[0])))
+        dataset.withColumn(self._cols[0], F.when(F.col(self._cols[1]).isNull(), '').otherwise(F.col(self._cols[1])))
+        dataset = dataset.withColumn(
             f"title_desc", F.concat(col(self._cols[0]), col(self._cols[1]))
         )
         return dataset

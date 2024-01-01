@@ -1,4 +1,3 @@
-# from pyspark.sql.types import *
 import click
 from pipe import Pipe
 
@@ -18,7 +17,8 @@ class CsvDataFrame(DataFrame):
 
     def __init__(self, path: str, spark: SparkSession, header: bool = True):
         super(CsvDataFrame, self).__init__(
-            spark.read.option("header", str(header).lower()).csv(path)._jdf, spark
+            spark.read.option("header", str(header).lower())\
+                .option("inferSchema", True).option("escape", '"').csv(path)._jdf, spark
         )
 
 
@@ -42,9 +42,9 @@ def preprocess_data(phase, master_url, input_path):
             SaveToParquet(f"data/processed/{phase}/features"),
         ]
     ).transform(CsvDataFrame(input_path, spark))
-
     print(f"Saved {df.count()} rows of {phase} inputs")
     spark.stop()
+
 
 
 if __name__ == "__main__":
