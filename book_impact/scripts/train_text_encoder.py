@@ -23,7 +23,7 @@ class CsvDataFrame(DataFrame):
 @click.option("-phase", "--phase", default="train", type=str, help="train/test")
 @click.option("-m", "--master-url", default="local[2]", type=str, help="master url")
 @click.option(
-    "-i", "--input-path", default="/Users/harshita/Downloads/books_task.csv", type=str
+    "-i", "--input-path", default="data/raw/books_task.csv", type=str
 )
 @click.option("-t", "--text-pipeline-path", default="data/processed/train/text_features", type=str)
 def train_tokeniser(phase, master_url, input_path, text_pipeline_path):

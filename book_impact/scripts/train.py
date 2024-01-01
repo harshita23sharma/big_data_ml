@@ -62,7 +62,6 @@ def train_model(phase, master_url, input_path):
 
         test_data_frac = 0.1
         features_df2 = features_df.na.drop(subset=CAT_COLUMNS).sample(0.1)
-        print("features_df2:", features_df2.count())
         transform_empty = udf(lambda s: "NA" if s == "" else s, StringType())
         for col in CAT_COLUMNS:
             features_df2 = features_df2.withColumn(col, transform_empty(col))
