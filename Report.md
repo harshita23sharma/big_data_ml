@@ -34,3 +34,12 @@ pip install -r requirements.txt
 - **scripts/train.py**: Read parquet file and fit the model on training data (splitted in previous step of hyper param tuning) Also saves the final model
   
 - **scripts/inference.py**: Loads the model and test data. Apply all the transformations on test data and predicts the model output
+
+MAE: 40%
+
+
+Model can be improved further:
+- Feature engineering: On "Pulisher": I have used all publishers, bucketizing publisher based on frequency (or popularity)
+- Feature engineering: On "PublishedDate": I have used month of Published date, but more info regarding quarter, special occasion from public data (like holidays) etc could have been included
+- Feature engineering: On "Book Title and description": I have used Tf idf count vectorizer model, but semanatic / contextual model like BertEmbedding or Glove trained on the training data will perform better.
+- Rows with missing values are currently included in the model. Imputation was not possible on the categorical data but those rows could have been removed for training.
