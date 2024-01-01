@@ -79,19 +79,16 @@ def train_model(phase, master_url, input_path):
                             outputCol="features"))
         assembler_estimator = Pipeline(stages = stages)
 
-        rf_estimator = RandomForestRegressor(maxDepth=7, numTrees=20, minInstancesPerNode=1,featuresCol='features', labelCol=label_col)
-
-        pipeline = Pipeline(stages=[assembler_estimator, rf_estimator])
+        # rf_estimator = RandomForestRegressor(maxDepth=7, numTrees=20, minInstancesPerNode=1,featuresCol='features', labelCol=label_col)
+        dt_estimator = DecisionTreeRegressor(maxDepth=9, featuresCol='features', labelCol=label_col, maxBins=32)
+        pipeline = Pipeline(stages=[assembler_estimator, dt_estimator])
 
         eval_metric = 'mae'
         folds = 3
         print(f'Preparing {eval_metric} evaluator and {folds}-fold cross-validator...')
-        mae_evaluator = RegressionEvaluator(metricName=eval_metric, labelCol=label_col)
-
         print(f'Searching for parameters...')
         start = timer()
         model = pipeline.fit(train_features_df)
-        
         
         model_path = 'model/book_impact_model'
 

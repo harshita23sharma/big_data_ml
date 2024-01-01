@@ -38,18 +38,13 @@ CAT_COLUMNS = ['publisher',
                     ]
 ONE_HOT_ENCODED_COLS = ['publisher_onehot', 'categories_onehot', 'publishedDate_month_onehot']
 VECTOR_COL = ["text_features"]
-# NUMERIC_COLUMNS = ['publisher_', 'categories_onehot', 'publishedDate_year_onehot', 'publishedDate_month_onehot']]
-
-
 
 @click.command()
-@click.option("-phase", "--phase", default="train", type=str, help="train/test")
 @click.option("-m", "--master-url", default="local[2]", type=str, help="master url")
 @click.option(
     "-i", "--input-path", default="data/processed/train/features", type=str
 )
-# @click.argument("input_path")
-def tune_model_param(phase, master_url, input_path):
+def tune_model_param(master_url, input_path):
     try:
         experiment = mlflow.get_experiment_by_name(MLFLOW_EXPERIMENT_NAME)
         experiment_id = experiment.experiment_id
@@ -58,17 +53,16 @@ def tune_model_param(phase, master_url, input_path):
         experiment_id = mlflow.create_experiment(MLFLOW_EXPERIMENT_NAME)
     with mlflow.start_run(experiment_id=experiment_id):
         spark = (
-            SparkSession.builder.master(master_url).appName("book_impact_train").getOrCreate()
+            SparkSession.builder.master(master_url).appName("book_impact_hyper_param_tuning").getOrCreate()
         )
         features_df = ParquetDataFrame(input_path, spark)
         mlflow.log_param("master_url", master_url)
         mlflow.log_param("input_path", input_path)
-        
 
         test_data_frac = 0.1
 
         #Sampling the data to reduce the size of data for training on local
-        features_df2 = features_df.na.drop(subset=CAT_COLUMNS).sample(0.01)
+        features_df2 = features_df.na.drop(subset=CAT_COLUMNS).sample(0.5)
         transform_empty = udf(lambda s: "NA" if s == "" else s, StringType())
         for col in CAT_COLUMNS:
             features_df2 = features_df2.withColumn(col, transform_empty(col))
