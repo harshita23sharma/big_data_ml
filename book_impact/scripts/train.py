@@ -35,7 +35,7 @@ CAT_COLUMNS = ['publisher',
                     'publishedDate_month'
                     ]
 ONE_HOT_ENCODED_COLS = ['publisher_onehot', 'categories_onehot', 'publishedDate_year_onehot', 'publishedDate_month_onehot']
-
+VECTOR_COL = ["text_features"]
 
 @click.command()
 @click.option("-phase", "--phase", default="train", type=str, help="train/test")
@@ -73,7 +73,9 @@ def train_model(phase, master_url, input_path):
         for col_name in CAT_COLUMNS:
             stages.append(pipeline_fit_category_to_one_hot_encode(col_name, col_name+"_numeric"))
             stages.append(pipeline_transform_category_to_one_hot_encode(col_name+"_numeric", col_name +'_onehot'))
-        stages.append(VectorAssembler(inputCols=ONE_HOT_ENCODED_COLS,
+        
+        #Vectorize one hot encoded and text feature
+        stages.append(VectorAssembler(inputCols=ONE_HOT_ENCODED_COLS+VECTOR_COL,
                             outputCol="features"))
         assembler_estimator = Pipeline(stages = stages)
 

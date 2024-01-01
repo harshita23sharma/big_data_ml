@@ -39,7 +39,7 @@ CAT_COLUMNS = ['publisher',
                     'publishedDate_month'
                     ]
 ONE_HOT_ENCODED_COLS = ['publisher_onehot', 'categories_onehot', 'publishedDate_year_onehot', 'publishedDate_month_onehot']
-
+VECTOR_COL = ["text_features"]
 
 @click.command()
 @click.option("-phase", "--phase", default="train", type=str, help="train/test")

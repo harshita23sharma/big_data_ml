@@ -33,10 +33,11 @@ def pipeline_transform_category_to_one_hot_encode(column_name, output_col_name):
 
 CAT_COLUMNS = ['publisher',
                     'categories',
-                    'publishedDate_year',
+                    # 'publishedDate_year',
                     'publishedDate_month'
                     ]
-ONE_HOT_ENCODED_COLS = ['publisher_onehot', 'categories_onehot', 'publishedDate_year_onehot', 'publishedDate_month_onehot']
+ONE_HOT_ENCODED_COLS = ['publisher_onehot', 'categories_onehot', 'publishedDate_month_onehot']
+VECTOR_COL = ["text_features"]
 # NUMERIC_COLUMNS = ['publisher_', 'categories_onehot', 'publishedDate_year_onehot', 'publishedDate_month_onehot']]
 
 
@@ -65,8 +66,9 @@ def tune_model_param(phase, master_url, input_path):
         
 
         test_data_frac = 0.1
-        features_df2 = features_df.na.drop(subset=CAT_COLUMNS).sample(0.1)
-        print("features_df2:", features_df2.count())
+
+        #Sampling the data to reduce the size of data for training on local
+        features_df2 = features_df.na.drop(subset=CAT_COLUMNS).sample(0.01)
         transform_empty = udf(lambda s: "NA" if s == "" else s, StringType())
         for col in CAT_COLUMNS:
             features_df2 = features_df2.withColumn(col, transform_empty(col))
@@ -77,7 +79,7 @@ def tune_model_param(phase, master_url, input_path):
         for col_name in CAT_COLUMNS:
             stages.append(pipeline_fit_category_to_one_hot_encode(col_name, col_name+"_numeric"))
             stages.append(pipeline_transform_category_to_one_hot_encode(col_name+"_numeric", col_name +'_onehot'))
-        stages.append(VectorAssembler(inputCols=ONE_HOT_ENCODED_COLS,
+        stages.append(VectorAssembler(inputCols=ONE_HOT_ENCODED_COLS+VECTOR_COL,
                             outputCol="features"))
         assembler_estimator = Pipeline(stages = stages)
 
