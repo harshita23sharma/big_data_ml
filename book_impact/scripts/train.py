@@ -2,24 +2,14 @@ from datetime import timedelta
 from timeit import default_timer as timer
 
 import click
-from pipe import Pipe
-from pyspark.ml import Pipeline, PipelineModel
 from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.ml.feature import OneHotEncoder, StringIndexer, VectorAssembler
-from pyspark.ml.functions import vector_to_array
-from pyspark.ml.regression import (DecisionTreeRegressor, GBTRegressor,
+from pyspark.ml.regression import (DecisionTreeRegressor,
                                    RandomForestRegressor)
 from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.functions import col, udf, when
+from pyspark.sql.functions import udf
 from pyspark.sql.types import StringType
-
-from book_impact.transformers.drop_columns import DropColumns
-from book_impact.transformers.get_concatenates_columns import \
-    GetConcatenatedColumns
-from book_impact.transformers.get_month_from_date import GetMonthFromDate
-from book_impact.transformers.get_year_from_date import GetYearFromDate
-from book_impact.transformers.save_to_parquet import SaveToParquet
 
 
 class ParquetDataFrame(DataFrame):
@@ -49,7 +39,7 @@ ONE_HOT_ENCODED_COLS = ['publisher_onehot', 'categories_onehot', 'publishedDate_
 
 @click.command()
 @click.option("-phase", "--phase", default="train", type=str, help="train/test")
-@click.option("-m", "--master-url", default="local[1]", type=str, help="master url")
+@click.option("-m", "--master-url", default="local[2]", type=str, help="master url")
 @click.option(
     "-i", "--input-path", default="data/processed/train/features", type=str
 )
@@ -61,7 +51,7 @@ def preprocess_data(phase, master_url, input_path):
     features_df = ParquetDataFrame(input_path, spark)
 
     test_data_frac = 0.1
-    features_df2 = features_df.na.drop(subset=CAT_COLUMNS).sample(0.05)
+    features_df2 = features_df.na.drop(subset=CAT_COLUMNS)
     print("features_df2:", features_df2.count())
     transform_empty = udf(lambda s: "NA" if s == "" else s, StringType())
     for col in CAT_COLUMNS:
@@ -78,19 +68,19 @@ def preprocess_data(phase, master_url, input_path):
     assembler_estimator = Pipeline(stages = stages)
 
     dt_estimator = DecisionTreeRegressor(maxDepth=5, featuresCol='features', labelCol=label_col, maxBins=32)
-    rf_estimator = RandomForestRegressor(maxDepth=5, numTrees=4, featuresCol='features', labelCol=label_col)
+    rf_estimator = RandomForestRegressor(maxDepth=5, numTrees=40, featuresCol='features', labelCol=label_col)
 
     pipeline = Pipeline(stages=[])
     dt_stages = [assembler_estimator, dt_estimator]
     rf_stages = [assembler_estimator, rf_estimator]
 
     dt_grid = ParamGridBuilder().baseOn({pipeline.stages: dt_stages}) \
-        .addGrid(dt_estimator.maxDepth, [2]) \
+        .addGrid(dt_estimator.maxDepth, [2, 5, 7, 9]) \
         .build()
 
     rf_grid = ParamGridBuilder().baseOn({pipeline.stages: rf_stages}) \
         .addGrid(rf_estimator.maxDepth, [5, 7]) \
-        .addGrid(rf_estimator.numTrees, [10]) \
+        .addGrid(rf_estimator.numTrees, [10, 20]) \
         .build()
 
     grid = dt_grid + rf_grid
