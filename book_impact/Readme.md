@@ -1,4 +1,4 @@
-Data Downloaded: books_task.csv
+Data Downloaded: books_task.csv inside book_impact/data/raw
 
 create dir : book_impact/data/processd and book_impact/data/predictions
 
