@@ -32,4 +32,6 @@ Performance Analysis:
 - Num of workers:3 -> Duration: 11 mins, MAE 41.19
 - <img width="1351" alt="image" src="https://github.com/harshita23sharma/big_data_ml/assets/16293041/07ddd148-1351-4d6f-89d4-3b290e1fbc29">
 
+- Num of workers:4 Out of memory issue
+
 
